@@ -1,0 +1,15 @@
+[Unit]
+Description=DirectQuotes API
+After=network.target
+
+[Service]
+WorkingDirectory=/var/www/directquotes/server
+EnvironmentFile=/var/www/directquotes/.env
+Environment=DB_PATH=/var/www/directquotes/data/leads.db
+ExecStart=/usr/bin/python3 /var/www/directquotes/server/app.py
+Restart=always
+User=www-data
+Group=www-data
+
+[Install]
+WantedBy=multi-user.target
