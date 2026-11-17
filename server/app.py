@@ -103,7 +103,7 @@ class H(BaseHTTPRequestHandler):
     def do_POST(self):
         if self.path != "/api/quote":
             return self.reply(404, {"error": "not found"})
-        ip = self.headers.get("CF-Connecting-IP") or self.headers.get("X-Real-IP") or self.client_address[0]
+        ip = self.headers.get("X-Forwarded-For", "").split(",")[-1].strip() or self.headers.get("X-Real-IP") or self.client_address[0]
         try:
             n = int(self.headers.get("Content-Length", 0))
             if n > 10000: return self.reply(413, {"error": "Request too large."})

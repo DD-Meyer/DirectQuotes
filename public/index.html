@@ -108,7 +108,6 @@ footer{padding:24px 0 40px;font-size:14px;color:var(--mut)}
      <select id="urgency" name="urgency"><option>Today (gate stuck or unsecured)</option><option selected>This week</option><option>Just comparing prices</option></select>
      <label class="consent"><input type="checkbox" id="consent" name="consent"><span>I agree that DirectQuotes may share these details with up to 2 gate motor technicians so they can contact me about my request.</span></label>
      <div class="hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
-     <div class="cf-turnstile" data-sitekey="__TURNSTILE_SITE_KEY__"></div>
     </div>
 
     <p class="err" id="err" role="alert"></p>
@@ -136,7 +135,6 @@ footer{padding:24px 0 40px;font-size:14px;color:var(--mut)}
 
 <footer><div class="wrap">DirectQuotes is a Netic Technologies service. We only use your details to arrange your quote, as described in our <a href="/privacy.html">privacy notice</a>.</div></footer>
 
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
 (function(){
 var f=document.getElementById('f'),step=1,total=3,err=document.getElementById('err');
