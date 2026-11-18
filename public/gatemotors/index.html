@@ -19,6 +19,8 @@ window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}
 gtag('js',new Date());gtag('config','G-BSZSX09SJF');
 // Google Ads conversion: paste "AW-123456789/AbCdEfGhIj" here once created (leave '' to skip)
 var ADS_CONVERSION='';
+// Google Maps key (Maps JavaScript API + Places API (New)), restrict it to directquotes.co.za/* in Google Cloud
+var MAPS_API_KEY='AIzaSyC88sMTDF6xAAc_RMrD96aAmt3sRvpOPYA';
 if(ADS_CONVERSION){gtag('config',ADS_CONVERSION.split('/')[0])}
 </script>
 
@@ -43,7 +45,7 @@ main{flex:1;position:relative;overflow:hidden;padding:56px 0 80px}
 .how li b{display:block;color:var(--black);font-weight:700;font-size:17px;margin-bottom:2px}
 .trust{margin:26px 0 0;padding-left:16px;border-left:3px solid var(--red);font-size:15px;line-height:1.55;color:#333}
 .hero-art{position:absolute;top:0;right:0;bottom:0;width:52%;pointer-events:none}
-.photo{position:absolute;inset:0;background:url("../assets/technician.jpg") center/cover no-repeat,linear-gradient(160deg,#e4e4e4,#f6f6f6);filter:grayscale(1);opacity:.32;clip-path:polygon(22% 0,100% 0,100% 100%,0 100%);-webkit-mask-image:linear-gradient(to bottom,#000 60%,transparent 100%);mask-image:linear-gradient(to bottom,#000 60%,transparent 100%)}
+.photo{position:absolute;inset:0;background:url("assets/technician.jpg") center/cover no-repeat,linear-gradient(160deg,#e4e4e4,#f6f6f6);filter:grayscale(1);opacity:.32;clip-path:polygon(22% 0,100% 0,100% 100%,0 100%);-webkit-mask-image:linear-gradient(to bottom,#000 60%,transparent 100%);mask-image:linear-gradient(to bottom,#000 60%,transparent 100%)}
 .cut{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .lm{display:none}
 @media(max-width:899px){
@@ -77,6 +79,16 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 .opt input:checked+span::before{border-color:var(--black);background:radial-gradient(circle,var(--red) 0 4.5px,var(--white) 5px)}
 .opt input:focus-visible+span{outline:3px solid var(--red);outline-offset:2px}
 
+.ac{position:relative}
+.ac ul{position:absolute;top:100%;left:0;right:0;z-index:20;margin:4px 0 0;padding:4px 0 0;list-style:none;background:var(--white);border:1.5px solid var(--black);border-radius:4px;box-shadow:0 14px 30px -14px rgba(0,0,0,.35);max-height:320px;overflow:auto}
+.ac li[role=option]{padding:11px 14px;cursor:pointer;display:flex;flex-direction:column;line-height:1.35}
+.ac .m{font-weight:600}.ac .s{font-size:14px;color:var(--mut)}
+.ac li[aria-selected=true]{background:#f2f2f2;box-shadow:inset 3px 0 0 var(--red)}
+.ac .pg{padding:6px 14px;font-size:12px;color:#777;text-align:right;border-top:1px solid #eee;margin-top:4px}
+input.ok{border-color:var(--black)}
+.hint{font-size:14px;color:var(--mut);margin:8px 0 0}
+.hint.ok{color:var(--black);font-weight:600}
+.hint.ok::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--red);margin-right:8px}
 label.f{display:block;font-weight:600;font-size:15px;margin:18px 0 6px}
 .q+label.f{margin-top:0}
 input[type=text],input[type=tel],input[type=email],select{width:100%;padding:14px;font:inherit;border:1.5px solid var(--line);border-radius:4px;background:var(--white);color:var(--black)}
@@ -149,8 +161,12 @@ footer a:focus-visible{outline:3px solid var(--red);outline-offset:3px}
 
      <div class="step" data-step="2" hidden>
       <p class="q">Where is the gate?</p>
-      <label class="f" for="suburb">Suburb or town</label>
-      <input id="suburb" name="suburb" type="text" autocomplete="address-level2" maxlength="80" placeholder="e.g. Meyerton">
+      <label class="f" for="address">Address</label>
+      <div class="ac">
+       <input id="address" name="address" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ac-list" aria-describedby="ac-hint" autocomplete="off" maxlength="160" placeholder="Start typing, e.g. 12 Main Road, Meyerton">
+       <ul id="ac-list" role="listbox" aria-label="Address suggestions" hidden></ul>
+      </div>
+      <p class="hint" id="ac-hint" aria-live="polite">Choose your address from the suggestions.</p>
       <label class="f" for="brand">Motor brand</label>
       <select id="brand" name="brand"><option>Not sure</option><option>Centurion</option><option>Nemtek</option><option>Gemini</option><option>ET</option><option>Hansa</option><option>Other</option></select>
       <label class="f" for="property">Property type</label>
@@ -187,7 +203,7 @@ footer a:focus-visible{outline:3px solid var(--red);outline-offset:3px}
   <div class="how">
    <h2>How DirectQuotes works</h2>
    <ol>
-    <li><b>Tell us what's wrong</b>Pick the fault, motor brand and suburb. It takes about a minute.</li>
+    <li><b>Tell us what's wrong</b>Pick the fault, motor brand and gate address. It takes about a minute.</li>
     <li><b>We contact the technicians for you</b>We pass your request to multiple technicians near you, so you don't have to phone around or explain the fault again and again.</li>
     <li><b>You receive the quotes together</b>Within 48 hours we send you every quote in one message. Compare them side by side and choose the best rate.</li>
    </ol>
@@ -221,12 +237,16 @@ function show(){
  document.querySelectorAll('.step').forEach(function(s){s.hidden=+s.dataset.step!==step});
  document.getElementById('prog').textContent='Step '+step+' of '+total;
  segs.forEach(function(s,i){s.classList.toggle('on',i<step)});
+ if(step===2)initPlaces();
  back.hidden=step===1;next.textContent=step===total?'Get my quote':'Next';err.textContent='';
 }
 function val(n){return (f.elements[n].value||'').trim()}
 function check(){
  if(step===1&&!f.querySelector('input[name=issue]:checked'))return 'Choose what the gate is doing.';
- if(step===2&&val('suburb').length<2)return 'Enter your suburb or town.';
+ if(step===2){
+  if(mapsFailed){if(val('address').length<5)return 'Enter your address.'}
+  else if(!sel)return 'Choose your address from the suggestions.';
+ }
  if(step===3){
   if(val('name').length<2)return 'Enter your name.';
   if(!/^(\+?27|0)[\d\s-]{8,12}$/.test(val('phone')))return 'Enter a valid South African phone number.';
@@ -239,7 +259,7 @@ next.onclick=function(){
  var m=check();if(m){err.textContent=m;return}
  if(step<total){step++;show();return}
  next.disabled=true;next.textContent='Sending...';
- var d={issue:f.querySelector('input[name=issue]:checked').value,brand:val('brand'),suburb:val('suburb'),property:val('property'),
+ var d={issue:f.querySelector('input[name=issue]:checked').value,brand:val('brand'),address:sel?sel.address:val('address'),place_id:sel?sel.placeId:'',lat:sel?sel.lat:null,lng:sel?sel.lng:null,suburb:sel?(sel.suburb||sel.address):val('address'),property:val('property'),
   name:val('name'),phone:val('phone'),email:val('email'),urgency:val('urgency'),consent:true,website:val('website'),page:location.href};
  fetch('/api/quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)})
  .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})})
@@ -253,6 +273,77 @@ next.onclick=function(){
  })
  .catch(function(e){err.textContent=(e.message&&e.message!=='failed'&&e.message!=='Failed to fetch')?e.message:'Could not send your request. Check your connection and try again.';next.disabled=false;next.textContent='Get my quote'});
 };
+var sel=null,mapsFailed=false,mapsP=null,places=null,token=null,seq=0,timer=null,items=[],active=-1;
+var inp=document.getElementById('address'),list=document.getElementById('ac-list'),hint=document.getElementById('ac-hint');
+function loadMaps(){return new Promise(function(res,rej){
+ window.__gm=function(){google.maps.importLibrary('places').then(res,rej)};
+ var s=document.createElement('script');
+ s.src='https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(MAPS_API_KEY)+'&loading=async&v=weekly&language=en&region=ZA&callback=__gm';
+ s.async=true;s.onerror=function(){rej(new Error('maps'))};document.head.appendChild(s);
+})}
+function fail(){mapsFailed=true;hint.className='hint';hint.textContent='Address search is unavailable. Type your full address.'}
+function initPlaces(){
+ if(places||mapsFailed||mapsP)return;
+ if(!MAPS_API_KEY){console.warn('MAPS_API_KEY is empty');fail();return}
+ mapsP=loadMaps().then(function(lib){places=lib;token=new lib.AutocompleteSessionToken()}).catch(fail);
+}
+function mark(ok){inp.classList.toggle('ok',ok);hint.className=ok?'hint ok':'hint';hint.textContent=ok?'Address confirmed':'Choose your address from the suggestions.'}
+function close(){list.hidden=true;inp.setAttribute('aria-expanded','false');inp.removeAttribute('aria-activedescendant');active=-1}
+function render(){
+ list.textContent='';
+ items.forEach(function(p,i){
+  var li=document.createElement('li');li.id='ac-'+i;li.setAttribute('role','option');
+  var m=document.createElement('span');m.className='m';m.textContent=p.mainText?p.mainText.text:p.text.text;
+  var s=document.createElement('span');s.className='s';s.textContent=p.secondaryText?p.secondaryText.text:'';
+  li.appendChild(m);li.appendChild(s);
+  li.addEventListener('mousedown',function(e){e.preventDefault();pick(i)});
+  list.appendChild(li);
+ });
+ var pg=document.createElement('li');pg.className='pg';pg.setAttribute('aria-hidden','true');pg.textContent='Powered by Google';list.appendChild(pg);
+ list.hidden=!items.length;inp.setAttribute('aria-expanded',items.length?'true':'false');
+}
+function query(){
+ var q=inp.value.trim();
+ if(!places||q.length<3){items=[];close();return}
+ var my=++seq;
+ places.AutocompleteSuggestion.fetchAutocompleteSuggestions({input:q,sessionToken:token,includedRegionCodes:['za']}).then(function(r){
+  if(my!==seq)return;
+  items=r.suggestions.map(function(s){return s.placePrediction}).filter(Boolean);active=-1;render();
+ }).catch(function(){if(my===seq){items=[];close();fail()}});
+}
+function pick(i){
+ var p=items[i];if(!p)return;seq++;close();inp.value=p.text.text;
+ var pl=p.toPlace();
+ pl.fetchFields({fields:['id','formattedAddress','location','addressComponents']}).then(function(){
+  var sub='',c=pl.addressComponents||[];
+  c.forEach(function(x){if(!sub&&(x.types.indexOf('sublocality_level_1')>-1||x.types.indexOf('sublocality')>-1))sub=x.longText});
+  if(!sub)c.forEach(function(x){if(!sub&&x.types.indexOf('locality')>-1)sub=x.longText});
+  sel={placeId:pl.id,address:pl.formattedAddress,lat:pl.location.lat(),lng:pl.location.lng(),suburb:sub};
+  inp.value=pl.formattedAddress;mark(true);err.textContent='';
+  token=new places.AutocompleteSessionToken();
+ }).catch(function(){sel=null;mark(false);err.textContent='Could not load that address. Choose it again.'});
+}
+function highlight(){
+ var o=list.querySelectorAll('[role=option]');
+ o.forEach(function(li,i){li.setAttribute('aria-selected',i===active?'true':'false')});
+ if(active>-1){inp.setAttribute('aria-activedescendant','ac-'+active);o[active].scrollIntoView({block:'nearest'})}
+}
+inp.addEventListener('input',function(){
+ if(mapsFailed)return;
+ if(sel){sel=null;mark(false)}
+ clearTimeout(timer);timer=setTimeout(query,250);
+});
+inp.addEventListener('keydown',function(e){
+ if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+  if(!items.length)return;e.preventDefault();
+  if(list.hidden)render();
+  active=e.key==='ArrowDown'?(active+1)%items.length:(active<=0?items.length-1:active-1);highlight();
+ }else if(e.key==='Enter'&&!list.hidden&&active>-1){e.preventDefault();pick(active)}
+ else if(e.key==='Escape')close();
+});
+inp.addEventListener('focus',function(){if(items.length&&!sel)render()});
+inp.addEventListener('blur',close);
+
 show();
 })();
 </script>
