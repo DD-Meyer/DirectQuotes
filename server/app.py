@@ -11,11 +11,13 @@ SMTP_USER, SMTP_PASS = E("SMTP_USER", "admin@netictechnologies.com"), E("SMTP_PA
 MAIL_FROM = E("MAIL_FROM", "admin@netictechnologies.com")
 MAIL_TO = E("MAIL_TO", "info@netictechnologies.com")
 SITE = E("SITE_URL", "https://directquotes.co.za")
+MAPS_API_KEY = E("MAPS_API_KEY", "")
+# Email logo: a file from public/assets/ (swap for DirectQuotes-Logo-black.png if you prefer)
+LOGO_URL = E("LOGO_URL", SITE + "/assets/DirectQuotes-Logo-main.png")
 TURNSTILE_SECRET = E("TURNSTILE_SECRET", "")
 DB_PATH = E("DB_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "leads.db"))
 PORT = int(E("PORT", "8099"))
 RATE_MAX, RATE_WINDOW = 5, 3600
-MAPS_API_KEY = E("MAPS_API_KEY", "")
 hits, lock = {}, threading.Lock()
 
 def db():
@@ -38,40 +40,45 @@ def tel_link(phone):
     return "tel:+" + intl_digits(phone)
 
 # ---------- HTML email building blocks (table layout, inline styles, safe in Gmail/Outlook) ----------
-FONT = "-apple-system,'Segoe UI',Helvetica,Arial,sans-serif"
-LINK = "color:#0969da;text-decoration:none;"
+# Palette copied from the site's CSS variables
+BLACK, WHITE, RED = "#000000", "#ffffff", "#ff1717"
+BG, LINE, MUTED = "#f6f6f6", "#dcdcdc", "#5f5f5f"
+FONT = "'Avenir Next',-apple-system,'Segoe UI',Helvetica,Arial,sans-serif"
+LINK = f"color:{BLACK};text-decoration:underline;"
 
 def layout(preheader, heading, card, links, footer):
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"></head>
-<body style="margin:0;padding:0;background:#ffffff;">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#ffffff;">{esc(preheader)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;"><tr><td align="center" style="padding:32px 16px;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;font-family:{FONT};color:#1f2328;">
-<tr><td align="center" style="padding-bottom:24px;font-size:22px;font-weight:800;letter-spacing:-0.01em;color:#14213d;">Direct<span style="color:#f2a900;">Quotes</span></td></tr>
-<tr><td align="center" style="font-size:28px;line-height:1.3;font-weight:300;padding:0 8px 24px;">{heading}</td></tr>
-<tr><td style="border:1px solid #d0d7de;border-radius:6px;padding:32px 28px;">{card}</td></tr>
+<body style="margin:0;padding:0;background:{BG};">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:{BG};">{esc(preheader)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:{BG};font-family:{FONT};color:{BLACK};">
+<tr><td align="center" style="background:{WHITE};border-bottom:1px solid #e6e6e6;padding:14px 16px;">
+<img src="{esc(LOGO_URL, quote=True)}" alt="DirectQuotes" height="44" style="display:block;margin:0 auto;height:44px;width:auto;border:0;font-size:22px;font-weight:800;color:{BLACK};">
+</td></tr>
+<tr><td align="center" style="padding:32px 16px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+<tr><td align="center" style="font-size:28px;line-height:1.3;font-weight:300;padding:0 8px 24px;color:{BLACK};">{heading}</td></tr>
+<tr><td style="background:{WHITE};border:1px solid {LINE};border-radius:6px;padding:32px 28px;">{card}</td></tr>
 <tr><td align="center" style="padding:24px 0 8px;font-size:14px;">{links}</td></tr>
-<tr><td align="center" style="padding:16px 8px;font-size:12px;line-height:1.6;color:#59636e;">{footer}</td></tr>
+<tr><td align="center" style="padding:16px 8px;font-size:12px;line-height:1.6;color:{MUTED};">{footer}</td></tr>
 </table></td></tr></table></body></html>"""
 
 def icon(symbol):
-    return ('<table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:0 auto 16px;"><tr>'
-            '<td align="center" width="56" height="56" style="width:56px;height:56px;border-radius:28px;background:#fff7e0;'
-            f'border:2px solid #f2a900;font-size:26px;line-height:56px;font-weight:700;color:#14213d;">{symbol}</td></tr></table>')
+    return (f'<div style="width:56px;height:56px;line-height:56px;margin:0 auto 16px;text-align:center;border-radius:50%;'
+            f'background:#ffecec;border:2px solid {RED};font-size:26px;font-weight:700;color:{RED};">{symbol}</div>')
 
 def rows(pairs):
     """pairs: (label, html_value). Callers must esc() any user text before passing it in."""
     out = "".join(
-        f'<tr><td style="padding:6px 16px 6px 0;color:#59636e;font-size:14px;vertical-align:top;white-space:nowrap;">{esc(k)}</td>'
+        f'<tr><td style="padding:6px 16px 6px 0;color:{MUTED};font-size:14px;vertical-align:top;white-space:nowrap;">{esc(k)}</td>'
         f'<td style="padding:6px 0;font-size:14px;font-weight:600;word-break:break-word;">{v}</td></tr>' for k, v in pairs)
     return f'<table role="presentation" cellpadding="0" cellspacing="0" width="100%">{out}</table>'
 
 def button(href, label):
     return ('<table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:24px auto 0;"><tr>'
-            '<td style="background:#f2a900;border-radius:6px;">'
-            f'<a href="{esc(href, quote=True)}" style="display:inline-block;padding:12px 22px;font-size:15px;font-weight:700;'
-            f'color:#14213d;text-decoration:none;">{esc(label)}</a></td></tr></table>')
+            f'<td style="background:{RED};border-radius:4px;">'
+            f'<a href="{esc(href, quote=True)}" style="display:inline-block;padding:13px 24px;font-size:16px;font-weight:700;'
+            f'color:{WHITE};text-decoration:none;">{esc(label)}</a></td></tr></table>')
 
 def customer_email(d):
     name = esc(d["name"])
@@ -94,16 +101,16 @@ Netic Technologies
     card = (icon("&#10003;")
         + '<div style="text-align:center;font-size:20px;font-weight:600;padding-bottom:8px;">Your quote is on its way</div>'
         + f'<p style="text-align:center;margin:0 0 24px;font-size:15px;line-height:1.6;">Hi {name}, we have received your request and will get a quote to you within <strong>48 hours</strong>.</p>'
-        + '<div style="border-top:1px solid #d0d7de;padding-top:20px;">'
+        + '<div style="border-top:1px solid #dcdcdc;padding-top:20px;">'
         + '<div style="font-weight:600;font-size:15px;padding-bottom:8px;">What you told us</div>'
         + rows([("Problem", esc(d["issue"])), ("Motor brand", esc(d["brand"])),
                 ("Suburb", esc(d["suburb"])), ("Urgency", esc(d["urgency"]))])
         + '</div>'
-        + '<p style="margin:20px 0 0;font-size:14px;line-height:1.6;color:#59636e;">If anything changes, or the gate is unsecured right now, just reply to this email.</p>')
+        + '<p style="margin:20px 0 0;font-size:14px;line-height:1.6;color:#5f5f5f;">If anything changes, or the gate is unsecured right now, just reply to this email.</p>')
     links = (f'<a href="mailto:{esc(MAIL_TO, quote=True)}" style="{LINK}">Reply to us</a>'
              f' &nbsp;&middot;&nbsp; <a href="{esc(SITE, quote=True)}/privacy.html" style="{LINK}">Privacy notice</a>')
     footer = ("You are receiving this email because you requested a gate motor repair quote on directquotes.co.za.<br>"
-              "DirectQuotes is a Netic Technologies service.")
+              "DirectQuotes is a Netic Technologies service. &copy; 2026 Netic Technologies")
     html = layout(f"We have received your request and will send your quote within 48 hours.",
                   "Quote request <strong>received</strong>", card, links, footer)
     return text, html
@@ -117,19 +124,19 @@ def admin_email(lead_id, d):
     card = (icon("#")
         + f'<div style="text-align:center;font-size:20px;font-weight:600;padding-bottom:8px;">{esc(d["issue"])}</div>'
         + f'<p style="text-align:center;margin:0 0 24px;font-size:15px;line-height:1.6;">{esc(d["suburb"])} &middot; {esc(d["urgency"])}</p>'
-        + '<div style="border-top:1px solid #d0d7de;padding-top:20px;">'
+        + '<div style="border-top:1px solid #dcdcdc;padding-top:20px;">'
         + '<div style="font-weight:600;font-size:15px;padding-bottom:8px;">Customer</div>'
         + rows([("Name", esc(d["name"])),
                 ("Phone", f'<a href="{esc(tel_link(d["phone"]), quote=True)}" style="{LINK}">{esc(d["phone"])}</a>'),
                 ("Email", f'<a href="mailto:{esc(d["email"], quote=True)}" style="{LINK}">{esc(d["email"])}</a>')])
         + '</div>'
-        + '<div style="border-top:1px solid #d0d7de;margin-top:20px;padding-top:20px;">'
+        + '<div style="border-top:1px solid #dcdcdc;margin-top:20px;padding-top:20px;">'
         + '<div style="font-weight:600;font-size:15px;padding-bottom:8px;">Job</div>'
         + rows([("Problem", esc(d["issue"])), ("Motor brand", esc(d["brand"])),
                 ("Suburb", esc(d["suburb"])), ("Property", esc(d["property"])), ("Urgency", esc(d["urgency"]))])
         + '</div>'
         + button(wa_link(d["phone"]), f"WhatsApp {d['name']}")
-        + f'<p style="margin:20px 0 0;font-size:12px;line-height:1.5;color:#59636e;word-break:break-all;">Source: {esc(d["page"])}</p>')
+        + f'<p style="margin:20px 0 0;font-size:12px;line-height:1.5;color:#5f5f5f;word-break:break-all;">Source: {esc(d["page"])}</p>')
     links = (f'<a href="mailto:{esc(d["email"], quote=True)}" style="{LINK}">Email customer</a>'
              f' &nbsp;&middot;&nbsp; <a href="{esc(tel_link(d["phone"]), quote=True)}" style="{LINK}">Call customer</a>')
     footer = "Lead saved to the DirectQuotes database. Replying to this email goes straight to the customer."
