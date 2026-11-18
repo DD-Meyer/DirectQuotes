@@ -11,6 +11,17 @@
 <meta property="og:description" content="Tell us what the gate is doing and get a repair quote from a local technician within 48 hours.">
 <meta property="og:url" content="https://directquotes.co.za/gatemotors/">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚪</text></svg>">
+
+<!-- Google tag (GA4 direct, replaces the Tag Manager snippet) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BSZSX09SJF"></script>
+<script>
+window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}
+gtag('js',new Date());gtag('config','G-BSZSX09SJF');
+// Google Ads conversion: paste "AW-123456789/AbCdEfGhIj" here once created (leave '' to skip)
+var ADS_CONVERSION='';
+if(ADS_CONVERSION){gtag('config',ADS_CONVERSION.split('/')[0])}
+</script>
+
 <style>
 :root{--ink:#14213d;--amber:#f2a900;--bg:#f4f5f1;--card:#fff;--mut:#55607a;--err:#b3261e;--ok:#1b6b3a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
@@ -59,13 +70,6 @@ footer{padding:24px 0 40px;font-size:14px;color:var(--mut)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
-<script async src="https://www.googletagmanager.com/gtm.js?id=GTM-PKH7ZZDJ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'GTM-PKH7ZZDJ');
-</script>
 <body>
 <header><div class="wrap"><div class="logo">Direct<span>Quotes</span></div><a class="call" href="mailto:info@netictechnologies.com">info@netictechnologies.com</a></div></header>
 
@@ -174,14 +178,16 @@ next.onclick=function(){
  if(step<total){step++;show();return}
  next.disabled=true;next.textContent='Sending...';
  var d={issue:f.querySelector('input[name=issue]:checked').value,brand:val('brand'),suburb:val('suburb'),property:val('property'),
-  name:val('name'),phone:val('phone'),email:val('email'),urgency:val('urgency'),consent:true,website:val('website'),
-  turnstile:(f.elements['cf-turnstile-response']||{}).value||'',page:location.href};
+  name:val('name'),phone:val('phone'),email:val('email'),urgency:val('urgency'),consent:true,website:val('website'),page:location.href};
  fetch('/api/quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)})
  .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})})
  .then(function(x){
   if(!x.ok)throw new Error(x.j.error||'failed');
   document.getElementById('form-body').hidden=true;document.getElementById('done').hidden=false;
-  if(window.gtag){gtag('event','conversion',{send_to:'__GOOGLE_ADS_CONVERSION__'})}
+  try{
+   gtag('event','generate_lead',{currency:'ZAR',value:150});
+   if(ADS_CONVERSION){gtag('event','conversion',{send_to:ADS_CONVERSION,value:150,currency:'ZAR'})}
+  }catch(e){}
  })
  .catch(function(e){err.textContent=(e.message&&e.message!=='failed'&&e.message!=='Failed to fetch')?e.message:'Could not send your request. Check your connection and try again.';next.disabled=false;next.textContent='Get my quote'});
 };
