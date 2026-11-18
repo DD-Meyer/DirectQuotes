@@ -15,6 +15,7 @@ TURNSTILE_SECRET = E("TURNSTILE_SECRET", "")
 DB_PATH = E("DB_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "leads.db"))
 PORT = int(E("PORT", "8099"))
 RATE_MAX, RATE_WINDOW = 5, 3600
+MAPS_API_KEY = E("MAPS_API_KEY", "")
 hits, lock = {}, threading.Lock()
 
 def db():
@@ -188,7 +189,17 @@ class H(BaseHTTPRequestHandler):
         self.send_response(code); self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(b))); self.end_headers(); self.wfile.write(b)
     def do_GET(self):
-        self.reply(200, {"ok": True}) if self.path == "/api/health" else self.reply(404, {"error": "not found"})
+        if self.path == "/api/health":
+            return self.reply(200, {"ok": True})
+        if self.path.split("?")[0] == "/api/config.js":
+            body = ("window.DQ_CONFIG=" + json.dumps({"mapsKey": MAPS_API_KEY}) + ";").encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/javascript; charset=utf-8")
+            self.send_header("Cache-Control", "public, max-age=3600")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers(); self.wfile.write(body)
+            return
+        self.reply(404, {"error": "not found"})
     def do_POST(self):
         if self.path != "/api/quote":
             return self.reply(404, {"error": "not found"})
