@@ -21,11 +21,10 @@ gtag('js',new Date());gtag('config','G-BSZSX09SJF');
 var ADS_CONVERSION='';
 </script>
 
-<!-- Google Maps key (Maps JavaScript API + Places API (New)), restrict it to directquotes.co.za/* in Google Cloud -->
+<!-- Google Maps key, served by the API from .env (restrict it to directquotes.co.za/* in Google Cloud) -->
+<script src="/api/config.js"></script>
 <script>
 var MAPS_API_KEY=(window.DQ_CONFIG||{}).mapsKey||'';
-// only load Maps when a real key exists
-if(MAPS_API_KEY && MAPS_API_KEY!=='change-me'){ /* your existing Maps loader here */ }
 </script>
 
 <style>
